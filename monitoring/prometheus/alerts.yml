@@ -1,0 +1,175 @@
+groups:
+  - name: backend_alerts
+    interval: 30s
+    rules:
+      # Backend down
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend сервис недоступен"
+          description: "Backend сервис не отвечает более 1 минуты"
+
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокий уровень ошибок 5xx"
+          description: "Более 5% запросов завершаются с ошибкой 5xx"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое время отклика"
+          description: "95-й перцентиль времени отклика > 2 секунд"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # PostgreSQL down
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL недоступен"
+          description: "PostgreSQL не отвечает более 1 минуты"
+
+      # High connections
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Много подключений к БД"
+          description: "Количество подключений к PostgreSQL превышает 80"
+
+      # Slow queries
+      - alert: SlowQueries
+        expr: rate(pg_stat_database_tup_returned[5m]) / rate(pg_stat_database_tup_fetched[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Медленные запросы к БД"
+          description: "Эффективность запросов снизилась"
+
+  - name: redis_alerts
+    interval: 30s
+    rules:
+      # Redis down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis недоступен"
+          description: "Redis не отвечает более 1 минуты"
+
+      # High memory usage
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти Redis"
+          description: "Redis использует более 90% доступной памяти"
+
+      # Too many connections
+      - alert: RedisTooManyConnections
+        expr: redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Много подключений к Redis"
+          description: "Количество клиентских подключений > 100"
+
+  - name: system_alerts
+    interval: 30s
+    rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокая загрузка CPU"
+          description: "Загрузка CPU превышает 80% более 10 минут"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти"
+          description: "Использование памяти превышает 90%"
+
+      # Low disk space
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Мало свободного места на диске"
+          description: "Свободно менее 10% места на диске"
+
+      # High disk I/O
+      - alert: HighDiskIO
+        expr: rate(node_disk_io_time_seconds_total[5m]) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокая нагрузка на диск"
+          description: "Диск перегружен более 10 минут"
+
+  - name: celery_alerts
+    interval: 30s
+    rules:
+      # Celery worker down
+      - alert: CeleryWorkerDown
+        expr: up{job="celery"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery worker недоступен"
+          description: "Celery worker не отвечает более 2 минут"
+
+      # Too many failed tasks
+      - alert: HighCeleryFailureRate
+        expr: rate(celery_task_failed_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Много failed задач в Celery"
+          description: "Более 10% задач завершаются с ошибкой"
+
+      # Queue growing
+      - alert: CeleryQueueGrowing
+        expr: celery_queue_length > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Очередь Celery растет"
+          description: "Очередь задач превышает 1000 элементов"

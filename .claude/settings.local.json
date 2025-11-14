@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python demo_server.py:*)",
+      "Bash(timeout /t 3)",
+      "Bash(nul)",
+      "Bash(curl:*)",
+      "Bash(start \"\" \"C:\\Users\\PC\\StroiNadzor\\OPEN_IN_BROWSER.html\")",
+      "Bash(start http://localhost:8000/docs)",
+      "Bash(taskkill:*)",
+      "Bash(npm --version)",
+      "Bash(start \"C:\\Users\\PC\\StroiNadzor\\web_app.html\")",
+      "Bash(start \"C:\\Users\\PC\\StroiNadzor\\advanced_app.html\")",
+      "Bash(start \"C:\\Users\\PC\\StroiNadzor\\OPEN_IN_BROWSER.html\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

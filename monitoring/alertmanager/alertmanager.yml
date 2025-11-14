@@ -1,0 +1,67 @@
+global:
+  # SMTP настройки для email уведомлений
+  smtp_smarthost: '${SMTP_HOST:-smtp.gmail.com}:587'
+  smtp_from: '${SMTP_USER:-alerts@tehnadzor.ru}'
+  smtp_auth_username: '${SMTP_USER}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+# Шаблоны для уведомлений
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Маршрутизация алертов
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+
+  # Специфичные маршруты
+  routes:
+    # Критические алерты - отправляем немедленно
+    - match:
+        severity: critical
+      receiver: 'critical'
+      group_wait: 0s
+      repeat_interval: 1h
+
+    # Warning алерты - группируем
+    - match:
+        severity: warning
+      receiver: 'warning'
+      repeat_interval: 6h
+
+# Receivers (получатели уведомлений)
+receivers:
+  - name: 'default'
+    email_configs:
+      - to: '${ALERT_EMAIL:-admin@tehnadzor.ru}'
+        headers:
+          Subject: '[ТехНадзор] Уведомление мониторинга'
+
+  - name: 'critical'
+    email_configs:
+      - to: '${ALERT_EMAIL:-admin@tehnadzor.ru}'
+        headers:
+          Subject: '[ТехНадзор CRITICAL] {{ .GroupLabels.alertname }}'
+    # Опционально: Telegram уведомления
+    # webhook_configs:
+    #   - url: 'https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage'
+    #     send_resolved: true
+
+  - name: 'warning'
+    email_configs:
+      - to: '${ALERT_EMAIL:-admin@tehnadzor.ru}'
+        headers:
+          Subject: '[ТехНадзор Warning] {{ .GroupLabels.alertname }}'
+
+# Подавление дублирующихся алертов
+inhibit_rules:
+  # Если сервис полностью down, не отправляем алерты о деталях
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']

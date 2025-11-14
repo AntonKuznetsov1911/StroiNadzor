@@ -1,0 +1,152 @@
+# Pre-commit hooks для автоматической проверки кода
+# Установка: pip install pre-commit
+# Активация: pre-commit install
+# Запуск вручную: pre-commit run --all-files
+
+repos:
+  # Базовые проверки файлов
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Удаление trailing whitespace
+      - id: end-of-file-fixer
+        name: Проверка EOF
+      - id: check-yaml
+        name: Проверка YAML файлов
+      - id: check-json
+        name: Проверка JSON файлов
+      - id: check-added-large-files
+        name: Проверка больших файлов (>500KB)
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+        name: Проверка merge конфликтов
+      - id: detect-private-key
+        name: Проверка приватных ключей
+      - id: mixed-line-ending
+        name: Проверка окончаний строк
+        args: ['--fix=lf']
+
+  # Python - Black formatter
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        name: Black - форматирование Python кода
+        language_version: python3.11
+        files: ^backend/
+
+  # Python - isort (сортировка imports)
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort - сортировка imports
+        args: ["--profile", "black"]
+        files: ^backend/
+
+  # Python - flake8 (linting)
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: flake8 - проверка качества кода
+        args: [
+          '--max-line-length=127',
+          '--extend-ignore=E203,W503',
+          '--exclude=.git,__pycache__,build,dist,venv,.venv'
+        ]
+        files: ^backend/
+
+  # Python - mypy (type checking)
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        name: mypy - проверка типов
+        additional_dependencies: [types-all]
+        args: [
+          '--ignore-missing-imports',
+          '--no-strict-optional',
+          '--warn-unused-ignores'
+        ]
+        files: ^backend/app/
+
+  # Security - Bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        name: bandit - проверка безопасности
+        args: ['-c', 'pyproject.toml', '--recursive', 'backend/app']
+        additional_dependencies: ['bandit[toml]']
+
+  # Secrets detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: detect-secrets - поиск секретов
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package-lock.json
+
+  # TypeScript/JavaScript - Prettier
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: prettier - форматирование JS/TS
+        types_or: [javascript, jsx, ts, tsx, json]
+        files: ^mobile/
+
+  # TypeScript/JavaScript - ESLint
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.56.0
+    hooks:
+      - id: eslint
+        name: eslint - проверка JS/TS
+        files: ^mobile/.*\.[jt]sx?$
+        types: [file]
+        additional_dependencies:
+          - eslint@8.56.0
+          - '@typescript-eslint/parser@6.19.0'
+          - '@typescript-eslint/eslint-plugin@6.19.0'
+
+  # Проверка Docker файлов
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: hadolint - проверка Dockerfile
+
+  # Проверка SQL файлов
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 3.0.0
+    hooks:
+      - id: sqlfluff-lint
+        name: sqlfluff - проверка SQL
+        files: \.sql$
+
+  # Commitizen - conventional commits
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        name: commitizen - проверка commit message
+        stages: [commit-msg]
+
+# Глобальные исключения
+exclude: |
+  (?x)^(
+    .*\.min\.(js|css)|
+    .*\.map|
+    node_modules/|
+    \.git/|
+    \.pytest_cache/|
+    __pycache__/|
+    \.venv/|
+    venv/|
+    build/|
+    dist/|
+    \.egg-info/
+  )$

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТехНадзор - AI Консультант (ЖИВАЯ ДЕМОНСТРАЦИЯ)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #1a202c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: #d4edda;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .chat-messages {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.ai {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+        }
+
+        .message-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .message-text {
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .regulations {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+
+        .regulation-tag {
+            display: inline-block;
+            background: #e6f2ff;
+            color: #0066cc;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-right: 6px;
+            margin-top: 6px;
+            font-size: 12px;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 60px;
+            transition: border-color 0.2s;
+        }
+
+        .input-area textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-area button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-area button:active {
+            transform: translateY(0);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .examples {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #1a202c;
+        }
+
+        .example-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .example-btn:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .confidence {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 ТехНадзор - AI Консультант</h1>
+            <p style="color: #718096; margin-top: 8px;">Умный помощник по строительным нормативам на базе OpenAI GPT-4</p>
+            <div class="status">
+                <div class="status-dot"></div>
+                <strong>Статус:</strong> Подключен к OpenAI API | Модель: GPT-4o-mini | База нормативов: 10 документов
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="messages">
+                <div class="message ai">
+                    <div class="message-header">AI Консультант</div>
+                    <div class="message-text">Здравствуйте! Я - AI консультант по строительным нормативам России.
+
+Я могу помочь вам с вопросами по:
+• СП (Своды Правил)
+• ГОСТ (ГОСТы)
+• СНиП (Строительные Нормы и Правила)
+
+Задайте мне вопрос или выберите пример ниже!</div>
+                    <div class="regulations">
+                        <span class="regulation-tag">СП 63.13330.2018</span>
+                        <span class="regulation-tag">СП 28.13330.2017</span>
+                        <span class="regulation-tag">ГОСТ 10180-2012</span>
+                        <span class="regulation-tag">СП 22.13330.2016</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #718096;">AI думает...</p>
+            </div>
+
+            <div class="input-area">
+                <textarea id="question" placeholder="Задайте вопрос по строительным нормативам..."></textarea>
+                <button onclick="askQuestion()">Отправить</button>
+            </div>
+        </div>
+
+        <div class="examples">
+            <h3>💡 Примеры вопросов:</h3>
+            <button class="example-btn" onclick="useExample(this)">Какие требования к прочности бетона класса B25?</button>
+            <button class="example-btn" onclick="useExample(this)">Обнаружена трещина в бетонной стене шириной 0.4 мм. Критична ли она?</button>
+            <button class="example-btn" onclick="useExample(this)">Какие нормативы регламентируют контроль качества сварных соединений?</button>
+            <button class="example-btn" onclick="useExample(this)">Допустимая нагрузка на фундамент жилого дома по СП 22.13330.2016</button>
+            <button class="example-btn" onclick="useExample(this)">Требования к гидроизоляции подвала по действующим нормативам</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1/regulations/ai-consult';
+
+        function useExample(btn) {
+            document.getElementById('question').value = btn.textContent;
+        }
+
+        async function askQuestion() {
+            const question = document.getElementById('question').value.trim();
+            if (!question) return;
+
+            const messagesContainer = document.getElementById('messages');
+            const loading = document.getElementById('loading');
+
+            // Добавляем вопрос пользователя
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `
+                <div class="message-header">Вы</div>
+                <div class="message-text">${escapeHtml(question)}</div>
+            `;
+            messagesContainer.appendChild(userMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Показываем загрузку
+            loading.classList.add('active');
+            document.getElementById('question').value = '';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                // Скрываем загрузку
+                loading.classList.remove('active');
+
+                // Добавляем ответ AI
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+
+                let regulationsHtml = '';
+                if (data.referenced_regulations && data.referenced_regulations.length > 0) {
+                    regulationsHtml = '<div class="regulations">Нормативы: ';
+                    data.referenced_regulations.forEach(reg => {
+                        regulationsHtml += `<span class="regulation-tag">${escapeHtml(reg)}</span>`;
+                    });
+                    regulationsHtml += '</div>';
+                }
+
+                const confidencePercent = Math.round(data.confidence * 100);
+                const confidenceHtml = `<div class="confidence">Уверенность: ${confidencePercent}%</div>`;
+
+                aiMessage.innerHTML = `
+                    <div class="message-header">AI Консультант</div>
+                    <div class="message-text">${escapeHtml(data.answer)}</div>
+                    ${regulationsHtml}
+                    ${confidenceHtml}
+                `;
+                messagesContainer.appendChild(aiMessage);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            } catch (error) {
+                loading.classList.remove('active');
+                alert('Ошибка: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enter для отправки
+        document.getElementById('question').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
