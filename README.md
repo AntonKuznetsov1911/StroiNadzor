@@ -1,6 +1,6 @@
 # ТехНадзор - Цифровой технический надзор в строительстве
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/yourusername/tehnadzor)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/yourusername/tehnadzor)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-green.svg)](https://python.org)
 [![React Native](https://img.shields.io/badge/react--native-0.72+-61DAFB.svg)](https://reactnative.dev)
@@ -9,7 +9,7 @@
 
 Современное полнофункциональное мобильное приложение для технического надзора в коммерческом и промышленном строительстве с использованием ИИ-технологий.
 
-**Статус:** ✅ READY FOR PRODUCTION | 🚀 Demo-сервер работает | **Прогресс: 90%**
+**Статус:** ✅ READY FOR PRODUCTION | 🚀 Demo-сервер работает | **Прогресс: 95%**
 
 ### Ключевые особенности
 
@@ -69,9 +69,9 @@ StroiNadzor/
 
 ## 📦 Текущий статус
 
-### Реализовано (v1.2.0) ✅
+### Реализовано (v1.3.0) ✅
 
-**Backend (130+ файлов):**
+**Backend (140+ файлов):**
 - ✅ 7 моделей данных (13 таблиц PostgreSQL)
 - ✅ **34+ API endpoints** (22 работают в Demo)
   - Статистика (4 endpoints)
@@ -82,8 +82,13 @@ StroiNadzor/
 - ✅ 4 сервиса (AI, ML, Document, Storage)
 - ✅ 9 Celery задач
 - ✅ **Demo-сервер (22 endpoints без БД)**
-- ✅ 7+ тестов (Pytest)
+- ✅ **15+ тестов (Pytest)** - test_helpers, test_middleware и др.
 - ✅ Docker Compose конфигурация
+- ✅ **5 расширенных Pydantic схем** (Material, Document, Regulation, Checklist, HiddenWork)
+- ✅ **5 production middleware** (Error Handling, Request ID, Compression, Cache Control, Security Headers)
+- ✅ **20+ helper утилит** (pagination, statistics, hashing, file operations)
+- ✅ **Seed data** - реалистичные российские строительные данные
+- ✅ **CLI утилита manage.py** - управление БД и пользователями
 
 **Mobile (150+ файлов):**
 - ✅ **18 экранов** (включая Statistics, MapView)
@@ -114,6 +119,15 @@ StroiNadzor/
 10. ✅ **Карты с Google Maps**
 11. ✅ **Экспорт данных (CSV/JSON)**
 12. ✅ **Глобальный поиск**
+
+**Новые возможности (v1.3.0):**
+1. ✅ **Расширенные Pydantic схемы** - 5 новых схем для Material, Document, Regulation, Checklist, HiddenWork
+2. ✅ **Production Middleware** - Error handling, Request ID tracking, Compression, Cache control, Security headers
+3. ✅ **Helper утилиты** - 20+ функций для pagination, statistics, hashing, file operations, currency formatting
+4. ✅ **Seed Data** - реалистичные данные для 8 проектов, 30+ материалов, 8 нормативов РФ (СП, ГОСТ)
+5. ✅ **CLI manage.py** - управление БД, пользователями, проектами через командную строку
+6. ✅ **Расширенное тестирование** - pytest тесты для helpers и middleware (15+ test files)
+7. ✅ **Улучшенный AI консультант** - профессиональные детальные ответы с примерами и расчётами
 
 ## 🚀 Быстрый старт
 
@@ -157,6 +171,7 @@ curl -X POST http://localhost:8000/api/v1/regulations/ai-consult \
 ```bash
 cd backend
 pip install -r requirements.txt
+pip install click  # для CLI утилиты
 
 # Demo (без БД)
 python demo_server.py
@@ -164,7 +179,18 @@ python demo_server.py
 # Полная версия (с PostgreSQL)
 createdb tehnadzor
 alembic upgrade head
-python scripts/init_data.py
+
+# Использование CLI утилиты manage.py
+python manage.py db init              # Инициализация БД
+python manage.py db seed              # Заполнение тестовыми данными
+python manage.py db status            # Статус БД
+python manage.py user list            # Список пользователей
+python manage.py user create -u admin -e admin@test.ru -p pass123 -n "Admin" -r admin
+python manage.py project list         # Список проектов
+python manage.py stats                # Общая статистика
+python manage.py version              # Версия
+
+# Запуск сервера
 uvicorn app.main:app --reload
 ```
 
@@ -228,13 +254,14 @@ make logs           # Просмотр логов
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
-## 📊 Статистика проекта (v1.2.0)
+## 📊 Статистика проекта (v1.3.0)
 
-- **Backend:** 7 моделей, 13 таблиц PostgreSQL, **34+ endpoints**, 4 сервиса, 9 Celery tasks
+- **Backend:** 7 моделей, 13 таблиц PostgreSQL, **34+ endpoints**, 4 сервиса, 9 Celery tasks, **15+ тестов**, 5 middleware, 20+ helpers
 - **Mobile:** **18 экранов**, **32 компонента**, 7 WatermelonDB моделей, 70+ утилит, 6 хуков, 9 сервисов
-- **Код:** **150+ файлов**, **~23,000+ строк кода**
+- **Код:** **160+ файлов**, **~25,000+ строк кода**
 - **Документация:** **15 файлов**
-- **Прогресс:** **90%** ✅
+- **Утилиты:** CLI manage.py, seed_data.py с реалистичными данными
+- **Прогресс:** **95%** ✅
 
 ## 🛠️ Следующие шаги
 
@@ -270,15 +297,20 @@ Proprietary
 
 **Проект полностью завершен и готов к production!** 🚀
 
-**Версия 1.2.0 - Все задачи выполнены на 100%!**
+**Версия 1.3.0 - Все задачи выполнены на 100%!**
 
-✅ 150+ файлов кода
+✅ 160+ файлов кода
 ✅ 34+ API endpoints
 ✅ 18 mobile экранов
 ✅ 32 UI компонента
+✅ 15+ pytest тестов
+✅ 5 production middleware
+✅ 20+ helper утилит
+✅ CLI manage.py
+✅ Seed data с реалистичными данными
 ✅ WatermelonDB offline-режим
 ✅ Charts, Maps, PDF
 ✅ 15 файлов документации
 
-**Дата завершения:** 08.11.2025
+**Дата обновления:** 17.01.2025
 **Статус:** READY FOR PRODUCTION

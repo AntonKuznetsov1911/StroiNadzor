@@ -182,3 +182,112 @@ class CORSDebugMiddleware(BaseHTTPMiddleware):
             )
 
         return response
+
+
+class ErrorHandlingMiddleware(BaseHTTPMiddleware):
+    """
+    Улучшенный middleware для обработки ошибок
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        try:
+            response = await call_next(request)
+            return response
+
+        except ValueError as exc:
+            logger.error(f"Validation error: {str(exc)}", exc_info=True)
+            return Response(
+                content=f'{{"detail": "Validation error: {str(exc)}"}}',
+                status_code=400,
+                media_type="application/json"
+            )
+
+        except PermissionError as exc:
+            logger.error(f"Permission denied: {str(exc)}", exc_info=True)
+            return Response(
+                content=f'{{"detail": "Permission denied: {str(exc)}"}}',
+                status_code=403,
+                media_type="application/json"
+            )
+
+        except FileNotFoundError as exc:
+            logger.error(f"Resource not found: {str(exc)}", exc_info=True)
+            return Response(
+                content=f'{{"detail": "Resource not found: {str(exc)}"}}',
+                status_code=404,
+                media_type="application/json"
+            )
+
+        except TimeoutError as exc:
+            logger.error(f"Request timeout: {str(exc)}", exc_info=True)
+            return Response(
+                content=f'{{"detail": "Request timeout", "error": "{str(exc)}"}}',
+                status_code=504,
+                media_type="application/json"
+            )
+
+        except Exception as exc:
+            logger.critical(f"Unhandled exception: {str(exc)}", exc_info=True)
+            return Response(
+                content='{"detail": "Internal server error"}',
+                status_code=500,
+                media_type="application/json"
+            )
+
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware для добавления уникального ID к каждому запросу
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        import uuid
+
+        # Генерируем уникальный ID запроса
+        request_id = str(uuid.uuid4())
+        request.state.request_id = request_id
+
+        # Добавляем request_id в логи
+        logger.info(f"Request ID: {request_id} - {request.method} {request.url.path}")
+
+        response = await call_next(request)
+
+        # Добавляем request_id в response headers
+        response.headers["X-Request-ID"] = request_id
+
+        return response
+
+
+class CompressionMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware для включения compression headers
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        response = await call_next(request)
+
+        # Добавляем headers для compression
+        if "gzip" in request.headers.get("accept-encoding", ""):
+            response.headers["Content-Encoding"] = "gzip"
+
+        return response
+
+
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware для установки cache-control headers
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        response = await call_next(request)
+
+        # Для статических файлов - длительный кеш
+        if request.url.path.startswith("/static"):
+            response.headers["Cache-Control"] = "public, max-age=31536000"
+        # Для API - без кеша
+        elif request.url.path.startswith("/api"):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+
+        return response
