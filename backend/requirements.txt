@@ -46,6 +46,7 @@ torchvision==0.17.0
 python-dateutil==2.8.2
 pytz==2024.1
 geopy==2.4.1
+click==8.1.7
 
 # PDF Generation
 reportlab==4.0.9
