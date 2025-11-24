@@ -2,10 +2,11 @@ services:
   - type: web
     name: tehnadzor-backend
     env: python
+    runtime: python
     region: frankfurt
     plan: free
     branch: main
-    buildCommand: cd backend && pip install -r requirements-railway.txt
+    buildCommand: pip install -r backend/requirements-railway.txt
     startCommand: cd backend && uvicorn demo_server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
