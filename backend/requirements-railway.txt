@@ -1,0 +1,21 @@
+# FastAPI и зависимости
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Pydantic для валидации
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# OpenAI и AI (облегченная версия без ML)
+openai==1.10.0
+anthropic==0.18.0
+pillow==10.2.0
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2024.1
+geopy==2.4.1
+
+# Development
+python-dotenv==1.0.1

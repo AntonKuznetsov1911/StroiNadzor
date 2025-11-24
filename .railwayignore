@@ -1,0 +1,23 @@
+# Игнорируем ненужные файлы для Railway
+mobile/
+monitoring/
+nginx/
+docs/
+tests/
+*.md
+*.bat
+*.ps1
+.git/
+.github/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+docker-compose*.yml
+Dockerfile*
+Makefile
+.pre-commit-config.yaml
+pyproject.toml

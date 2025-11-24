@@ -3,7 +3,7 @@
 """
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
@@ -673,6 +673,20 @@ async def batch_export(project_ids: List[int], format: str = "json"):
         )
 
     return {"error": "Unsupported format"}
+
+
+# Веб-приложение для Telegram
+@app.get("/webapp", response_class=HTMLResponse, tags=["WebApp"])
+async def get_webapp():
+    """Полное веб-приложение для Telegram Mini App"""
+    try:
+        with open("webapp.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<h1>WebApp not found</h1><p>Please contact administrator</p>",
+            status_code=404
+        )
 
 
 if __name__ == "__main__":
